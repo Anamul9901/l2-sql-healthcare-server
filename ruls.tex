@@ -1,0 +1,14 @@
+1: yarn init
+2: yarn add prisma typescript ts-node @types/node -D
+3: npx tsc --init
+4: chang 'tsconfig.json' file: ["rootDir": "./src"],   and [ "outDir": "./dist",]
+5: npx prisma init
+6: .env file DATABASE_URL name, pass and database name add
+
+
+
+--------node express----------
+1: yarn add express
+2: yarn add ts-node-dev -D
+2.2: add script in package.json file [ts-node-dev --respawn --transpile-only server.ts]
+3: yarn add cors
