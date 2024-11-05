@@ -1,15 +1,17 @@
 import { Prisma, PrismaClient } from "@prisma/client";
+import { adminSearcgAbleFirlds } from "./admin.constant";
 
 const prisma = new PrismaClient();
 
-const getAllFromDb = async (params: any) => {
+const getAllFromDb = async (params: any, options: any) => {
   //   console.log({ params });
   const { searchTerm, ...filterData } = params;
-//   console.log(filterData); //* aikhane upore destracture korar karone, searchTerm bade onno gulu show korbe
+  //   console.log(filterData); //* aikhane upore destracture korar karone, searchTerm bade onno gulu show korbe
+  const { limit, page } = options;
+  console.log({limit, page})
 
   const andConditions: Prisma.AdminWhereInput[] = [];
 
-  const adminSearcgAbleFirlds = ["name", "email"];
   if (params.searchTerm) {
     andConditions.push({
       OR: adminSearcgAbleFirlds.map((field) => ({
@@ -21,15 +23,15 @@ const getAllFromDb = async (params: any) => {
     });
   }
 
-//   console.log(Object.keys(filterData)); // aikhane key gulu array akare debe
+  //   console.log(Object.keys(filterData)); // aikhane key gulu array akare debe
   if (Object.keys(filterData).length > 0) {
     andConditions.push({
-        AND: Object.keys(filterData).map(key=>({
-            [key]: {
-                equals: filterData[key]
-            }
-        }))
-    })
+      AND: Object.keys(filterData).map((key) => ({
+        [key]: {
+          equals: filterData[key],
+        },
+      })),
+    });
   }
 
   //   console.dir(andConditions, {depth: 'indinity'})
@@ -39,6 +41,8 @@ const getAllFromDb = async (params: any) => {
 
   const result = await prisma.admin.findMany({
     where: whereContitions,
+    skip: (Number(page )- 1) * Number(limit),
+    take: Number(limit)
   });
   return result;
 };
