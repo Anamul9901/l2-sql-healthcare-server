@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { adminSearcgAbleFirlds } from "./admin.constant";
+import { paginationHelper } from "../../../helpars/paginationHelper";
 
 const prisma = new PrismaClient();
 
@@ -7,8 +8,9 @@ const getAllFromDb = async (params: any, options: any) => {
   //   console.log({ params });
   const { searchTerm, ...filterData } = params;
   //   console.log(filterData); //* aikhane upore destracture korar karone, searchTerm bade onno gulu show korbe
-  const { limit, page } = options;
-  console.log({limit, page})
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePaginatin(options);
+  console.log({ limit, page, sortBy, sortOrder });
 
   const andConditions: Prisma.AdminWhereInput[] = [];
 
@@ -41,8 +43,16 @@ const getAllFromDb = async (params: any, options: any) => {
 
   const result = await prisma.admin.findMany({
     where: whereContitions,
-    skip: (Number(page )- 1) * Number(limit),
-    take: Number(limit)
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder
+        ? {
+            [sortBy]: sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
   });
   return result;
 };
