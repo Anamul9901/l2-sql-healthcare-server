@@ -1,8 +1,8 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { adminSearcgAbleFirlds } from "./admin.constant";
 import { paginationHelper } from "../../../helpars/paginationHelper";
+import prisma from "../../../shared/prisma";
 
-const prisma = new PrismaClient();
 
 const getAllFromDb = async (params: any, options: any) => {
   //   console.log({ params });
