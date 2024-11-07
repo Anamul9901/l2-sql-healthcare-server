@@ -77,6 +77,12 @@ const getByIdFromDB = async (id: string) => {
 };
 
 const updateIntoDB = async (id: string, data: Partial<Admin>) => {
+  // id na thakle aikhan theke not found error show korbe.
+  const isExist = await prisma.admin.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
 
   // foregn key update hobe nah. jemon: email
   const result = await prisma.admin.update({
@@ -88,8 +94,36 @@ const updateIntoDB = async (id: string, data: Partial<Admin>) => {
   return result;
 };
 
+const deleteFromDB = async (id: string) => {
+  // for not fount error message
+  await prisma.admin.findUniqueOrThrow({
+    where: {
+      id
+    }
+  })
+
+  const result = await prisma.$transaction(async (transactionClient) => {
+    const adminDletedData = await transactionClient.admin.delete({
+      where: {
+        id,
+      },
+    });
+
+    const userDeletedData = await transactionClient.user.delete({
+      where: {
+        email: adminDletedData.email,
+      },
+    });
+
+    return adminDletedData;
+  });
+
+  return result;
+};
+
 export const AdminService = {
   getAllFromDb,
   getByIdFromDB,
   updateIntoDB,
+  deleteFromDB,
 };
