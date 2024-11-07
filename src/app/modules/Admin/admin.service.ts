@@ -36,8 +36,8 @@ const getAllFromDb = async (params: any, options: any) => {
   }
 
   andConditions.push({
-    isDeleted: false
-  })
+    isDeleted: false,
+  });
 
   //   console.dir(andConditions, {depth: 'indinity'})
 
@@ -71,22 +71,25 @@ const getAllFromDb = async (params: any, options: any) => {
   };
 };
 
-const getByIdFromDB = async (id: string) => {
+const getByIdFromDB = async (id: string): Promise<Admin | null> => {
   const result = await prisma.admin.findUnique({
     where: {
       id,
-      isDeleted: false
+      isDeleted: false,
     },
   });
   return result;
 };
 
-const updateIntoDB = async (id: string, data: Partial<Admin>) => {
+const updateIntoDB = async (
+  id: string,
+  data: Partial<Admin>
+): Promise<Admin> => {
   // id na thakle aikhan theke not found error show korbe.
   const isExist = await prisma.admin.findUniqueOrThrow({
     where: {
       id,
-      isDeleted: false
+      isDeleted: false,
     },
   });
 
@@ -100,7 +103,7 @@ const updateIntoDB = async (id: string, data: Partial<Admin>) => {
   return result;
 };
 
-const deleteFromDB = async (id: string) => {
+const deleteFromDB = async (id: string): Promise<Admin | null> => {
   // for not fount error message
   await prisma.admin.findUniqueOrThrow({
     where: {
@@ -115,7 +118,7 @@ const deleteFromDB = async (id: string) => {
       },
     });
 
-    const userDeletedData = await transactionClient.user.delete({
+    await transactionClient.user.delete({
       where: {
         email: adminDletedData.email,
       },
@@ -127,12 +130,12 @@ const deleteFromDB = async (id: string) => {
   return result;
 };
 
-const softDeleteFromDB = async (id: string) => {
+const softDeleteFromDB = async (id: string): Promise<Admin | null> => {
   // for not fount error message
   await prisma.admin.findUniqueOrThrow({
     where: {
       id,
-      isDeleted: false
+      isDeleted: false,
     },
   });
 
@@ -146,7 +149,7 @@ const softDeleteFromDB = async (id: string) => {
       },
     });
 
-    const userDeletedData = await transactionClient.user.update({
+    await transactionClient.user.update({
       where: {
         email: adminDletedData.email,
       },
