@@ -3,14 +3,13 @@ import { adminSearcgAbleFirlds } from "./admin.constant";
 import { paginationHelper } from "../../../helpars/paginationHelper";
 import prisma from "../../../shared/prisma";
 
-
 const getAllFromDb = async (params: any, options: any) => {
   //   console.log({ params });
   const { searchTerm, ...filterData } = params;
   //   console.log(filterData); //* aikhane upore destracture korar karone, searchTerm bade onno gulu show korbe
   const { limit, page, skip, sortBy, sortOrder } =
     paginationHelper.calculatePaginatin(options);
-  console.log({ limit, page, sortBy, sortOrder });
+  // console.log({ limit, page, sortBy, sortOrder });
 
   const andConditions: Prisma.AdminWhereInput[] = [];
 
@@ -54,7 +53,18 @@ const getAllFromDb = async (params: any, options: any) => {
             createdAt: "desc",
           },
   });
-  return result;
+
+  const total = await prisma.admin.count({
+    where: whereContitions,
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total
+    },
+    data: result,
+  };
 };
 
 export const AdminService = {
