@@ -47,7 +47,7 @@ const updateIntoDB = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const data = req.body;
-    console.log(data)
+    console.log(data);
     const result = await AdminService.updateIntoDB(id, data);
     res.status(200).json({
       success: true,
@@ -63,7 +63,7 @@ const updateIntoDB = async (req: Request, res: Response) => {
   }
 };
 
-const deleteFromDB = async(req: Request, res: Response)=>{
+const deleteFromDB = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const result = await AdminService.deleteFromDB(id);
@@ -79,11 +79,30 @@ const deleteFromDB = async(req: Request, res: Response)=>{
       error: err,
     });
   }
-}
+};
+
+const softDeleteFromDB = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await AdminService.softDeleteFromDB(id);
+    res.status(200).json({
+      success: true,
+      message: "Admin data deleted!",
+      data: result,
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.name || "Something went wrong",
+      error: err,
+    });
+  }
+};
 
 export const AdminController = {
   getAllFromDB,
   getByIdFromDB,
   updateIntoDB,
-  deleteFromDB
+  deleteFromDB,
+  softDeleteFromDB,
 };
