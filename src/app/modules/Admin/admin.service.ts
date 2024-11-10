@@ -2,9 +2,14 @@ import { Admin, Prisma, UserStatus } from "@prisma/client";
 import { adminSearcgAbleFirlds } from "./admin.constant";
 import { paginationHelper } from "../../../helpars/paginationHelper";
 import prisma from "../../../shared/prisma";
+import { IAdminFilterRequest } from "./admin.interfact";
+import { IPaginationOptions } from "../../interfaces/pagination";
 
-const getAllFromDb = async (params: any, options: any) => {
-  //   console.log({ params });
+const getAllFromDb = async (
+  params: IAdminFilterRequest,
+  options: IPaginationOptions
+) => {
+  console.log(options);
   const { searchTerm, ...filterData } = params;
   //   console.log(filterData); //* aikhane upore destracture korar karone, searchTerm bade onno gulu show korbe
   const { limit, page, skip, sortBy, sortOrder } =
@@ -29,7 +34,7 @@ const getAllFromDb = async (params: any, options: any) => {
     andConditions.push({
       AND: Object.keys(filterData).map((key) => ({
         [key]: {
-          equals: filterData[key],
+          equals: (filterData as any)[key],
         },
       })),
     });
@@ -72,7 +77,6 @@ const getAllFromDb = async (params: any, options: any) => {
 };
 
 const getByIdFromDB = async (id: string): Promise<Admin | null> => {
-
   const result = await prisma.admin.findUniqueOrThrow({
     where: {
       id,
