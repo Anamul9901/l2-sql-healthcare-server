@@ -46,12 +46,10 @@ const refreshToken = async (token: string) => {
   let decodedData;
   try {
     decodedData = jwtHelpers.verifyToken(token, configs.jwt.refresh_token_secret as Secret);
-    console.log(decodedData);
   } catch (err) {
     throw new Error("You are not authorized!");
   }
 
-  console.log(decodedData);
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: decodedData.email,
