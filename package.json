@@ -7,6 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/http-status": "^1.1.2",
@@ -22,6 +23,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/http-status-codes": "^1.2.0",
     "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^4.21.1",
     "http-status-ts": "^2.0.1",

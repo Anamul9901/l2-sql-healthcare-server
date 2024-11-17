@@ -1,6 +1,9 @@
 import prisma from "../../../shared/prisma";
 import * as bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { jwtHelpers } from "../../../helpars/jwtHelpers";
+
+
 
 const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUniqueOrThrow({
@@ -18,31 +21,19 @@ const loginUser = async (payload: { email: string; password: string }) => {
     throw new Error("Password incorrect!");
   }
 
-  const accessToken = jwt.sign(
-    {
-      email: userData.email,
-      role: userData.role,
-    },
-    "secrate_key",
-    {
-      algorithm: "HS256",
-      expiresIn: "5m",
-    }
+  const accessToken = jwtHelpers.generateToken(
+    { email: userData.email, role: userData.role },
+    "secreate_key",
+    "5m"
   );
 
-  const refreshToken = jwt.sign(
-    {
-      email: userData.email,
-      role: userData.role,
-    },
-    "secrate_key_refresh",
-    {
-      algorithm: "HS256",
-      expiresIn: "30d",
-    }
+  const refreshToken =  jwtHelpers.generateToken(
+    { email: userData.email, role: userData.role },
+    "secreate_key_refresh",
+    "30d"
   );
 
-//   console.log({ accessToken });
+  //   console.log({ accessToken });
   return {
     accessToken,
     refreshToken,
@@ -50,6 +41,12 @@ const loginUser = async (payload: { email: string; password: string }) => {
   };
 };
 
+
+const refreshToken = async(token: string) =>{
+  console.log('refresh', token);
+}
+
 export const AuthService = {
   loginUser,
+  refreshToken
 };
