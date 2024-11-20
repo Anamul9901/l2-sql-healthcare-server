@@ -74,7 +74,7 @@ const refreshToken = async (token: string) => {
   };
 };
 
-const changePassword = async (user, payload) => {
+const changePassword = async (user: any, payload: any) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: user.email,
@@ -107,8 +107,29 @@ const changePassword = async (user, payload) => {
   };
 };
 
+const forgotPassword = async (payload: { email: string }) => {
+  const userData = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: payload.email,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
+  const resetPassToken = jwtHelpers.generateToken({
+    email: userData.email,
+    role: userData.role,
+  }, configs.jwt.reset_pass_secret as Secret, configs.jwt.reset_pass_secret_expires_in as string);
+  
+  //http://localhost:3000/reset-pass?id=232323&token=s984375hfsdfsuy9435598hdfhsady
+  
+  const resetPassLink = configs.reset_pass_link + `?userId=${userData.id}&token=${resetPassToken}`
+  console.log(resetPassLink)
+};
+
+
 export const AuthService = {
   loginUser,
   refreshToken,
   changePassword,
+  forgotPassword,
 };
