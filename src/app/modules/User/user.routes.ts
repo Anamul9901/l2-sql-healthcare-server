@@ -12,7 +12,7 @@ router.post(
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   fileUploader.upload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
-    req.body = userVlidation.createAdmn.parse(JSON.parse(req.body.data))
+    req.body = userVlidation.createAdmn.parse(JSON.parse(req.body.data));
     return userController.createAdmin(req, res, next);
   }
 );
@@ -22,8 +22,8 @@ router.post(
   auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
   fileUploader.upload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
-    req.body = userVlidation.createAdmn.parse(JSON.parse(req.body.data))
-    return userController.createAdmin(req, res, next);
+    req.body = userVlidation.createDoctor.parse(JSON.parse(req.body.data));
+    return userController.createDoctor(req, res, next);
   }
 );
 

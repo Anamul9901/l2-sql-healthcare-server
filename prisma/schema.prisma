@@ -82,5 +82,5 @@ enum UserStatus {
 
 enum Gender {
   MALE
-  FEMAL
+  FEMALE
 }
