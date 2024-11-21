@@ -70,8 +70,8 @@ model Doctor {
 
 model Patient {
   id            String   @id @default(uuid())
-  email         String   @unique
   name          String
+  email         String   @unique
   profilePhoto  String?
   contactNumber String?
   address       String?
