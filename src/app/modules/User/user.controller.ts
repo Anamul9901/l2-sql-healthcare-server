@@ -4,10 +4,10 @@ import catchAsync from "../../../shared/catchAsync";
 import pick from "../../../shared/pick";
 import { userFilterableFields } from "./user.constant";
 import sendResponse from "../../../shared/sendResponse";
+import { IAuthUser } from "../../interfaces/common";
 
 const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
   try {
-
     const result = await userService.createAdmin(req);
     // res.send(result);
     res.status(200).json({
@@ -24,9 +24,12 @@ const createAdmin = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-const createDoctor = async (req: Request, res: Response, next: NextFunction) => {
+const createDoctor = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-
     const result = await userService.createDoctor(req);
     res.status(200).json({
       success: true,
@@ -42,9 +45,12 @@ const createDoctor = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
-const createPatient = async (req: Request, res: Response, next: NextFunction) => {
+const createPatient = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-
     const result = await userService.createPatient(req);
     res.status(200).json({
       success: true,
@@ -78,9 +84,7 @@ const getAllFromDB = catchAsync(async (req, res) => {
 });
 
 const changeProfileStatus = catchAsync(async (req, res) => {
-  
-  const {id} = req.params
-
+  const { id } = req.params;
 
   const result = await userService.changeProfileStatus(id, req.body);
 
@@ -92,24 +96,23 @@ const changeProfileStatus = catchAsync(async (req, res) => {
   });
 });
 
-const getMyProfile = catchAsync(async (req, res) => {
+const getMyProfile = catchAsync(
+  async (req: Request & { user?: IAuthUser }, res) => {
+    const user = req.user as IAuthUser;
 
-  const user = req.user
+    const result = await userService.getMyProfile(user);
 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "My profile data fetched!",
+      data: result,
+    });
+  }
+);
 
-  const result = await userService.getMyProfile(user);
-
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "My profile data fetched!",
-    data: result,
-  });
-});
-
-const updateMyProfile = catchAsync(async (req, res) => {
-
-  const user = req.user;
+const updateMyProfile = catchAsync(async (req: Request & {user?: IAuthUser}, res: Response) => {
+  const user = req.user as IAuthUser;
   const result = await userService.updateMyProfile(user, req);
 
   sendResponse(res, {
@@ -127,5 +130,5 @@ export const userController = {
   getAllFromDB,
   changeProfileStatus,
   getMyProfile,
-  updateMyProfile
+  updateMyProfile,
 };
