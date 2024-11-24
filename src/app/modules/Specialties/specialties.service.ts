@@ -1,3 +1,4 @@
+import { Request } from "express";
 import { fileUploader } from "../../../helpars/fileUploader";
 import prisma from "../../../shared/prisma";
 import { IFile } from "../../interfaces/file";
@@ -18,6 +19,30 @@ const insertIntoDB = async (req: Request) => {
   return result;
 };
 
+const getAllSpecialties = async () => {
+  const result = await prisma.specialties.findMany();
+
+  return result;
+};
+
+const deleteSpecialties = async (id: string) => {
+  await prisma.specialties.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  const result = await prisma.specialties.delete({
+    where: {
+      id,
+    },
+  });
+
+  return result;
+};
+
 export const SpecialtiesService = {
   insertIntoDB,
+  getAllSpecialties,
+  deleteSpecialties,
 };
