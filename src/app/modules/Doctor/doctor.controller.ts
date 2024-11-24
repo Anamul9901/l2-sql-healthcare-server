@@ -55,9 +55,22 @@ const deleteFromDB: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const updateIntoDB: RequestHandler = catchAsync(async (req, res) => {
+  const {id} = req.params;
+  const result = await DoctorService.updateIntoDB(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Doctor updated Successfully!",
+    data: result,
+  });
+});
+
 export const DoctorController = {
   getAllFromDB,
   findByIdFromDB,
   softDeleteFromDB,
-  deleteFromDB
+  deleteFromDB,
+  updateIntoDB
 };

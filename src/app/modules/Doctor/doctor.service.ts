@@ -136,15 +136,37 @@ const deleteFromDB = async (id: string): Promise<Doctor | null> => {
       },
     });
 
-    return doctorDeleteData
+    return doctorDeleteData;
   });
 
-  return result
+  return result;
+};
+
+const updateIntoDB = async (id: string, payload: any) => {
+  const doctorData = await prisma.doctor.findUniqueOrThrow({
+    where: {
+      id,
+      isDeleted: false,
+    },
+  });
+
+  const updateDoctorData = await prisma.doctor.update({
+    where: {
+      id
+    },
+    data: payload,
+    include: {
+      doctorSpecialties: true
+    }
+  })
+
+  return updateDoctorData
 };
 
 export const DoctorService = {
   getAllFromDb,
   findByIdFromDB,
   softDeleteFromDB,
-  deleteFromDB
+  deleteFromDB,
+  updateIntoDB,
 };
