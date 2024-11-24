@@ -143,24 +143,66 @@ const deleteFromDB = async (id: string): Promise<Doctor | null> => {
 };
 
 const updateIntoDB = async (id: string, payload: any) => {
-  const doctorData = await prisma.doctor.findUniqueOrThrow({
+  const { specialties, ...doctorData } = payload;
+
+  const doctorInfo = await prisma.doctor.findUniqueOrThrow({
     where: {
       id,
       isDeleted: false,
     },
   });
 
-  const updateDoctorData = await prisma.doctor.update({
-    where: {
-      id
-    },
-    data: payload,
-    include: {
-      doctorSpecialties: true
-    }
-  })
+  await prisma.$transaction(async (transactionClient) => {
+    await transactionClient.doctor.update({
+      where: {
+        id,
+      },
+      data: doctorData,
+    });
 
-  return updateDoctorData
+    if (specialties && specialties.length > 0) {
+      // delete specilties
+      const deleteSpecialtiesIds = specialties.filter(
+        (speciality: any) => speciality.isDeleted
+      );
+      for (const specialty of deleteSpecialtiesIds) {
+        await transactionClient.doctorSpecialties.deleteMany({
+          where: {
+            doctorId: doctorInfo.id,
+            specialitiesId: specialty.specialitiesId,
+          },
+        });
+      }
+
+      // create specilties
+      const createSpecialtiesIds = specialties.filter(
+        (speciality: any) => !speciality.isDeleted
+      );
+      for (const specialty of createSpecialtiesIds) {
+        await transactionClient.doctorSpecialties.create({
+          data: {
+            doctorId: doctorInfo.id,
+            specialitiesId: specialty.specialitiesId,
+          },
+        });
+      }
+    }
+  });
+
+  const result = await prisma.doctor.findUnique({
+    where: {
+      id: doctorInfo.id,
+    },
+    include: {
+      doctorSpecialties: {
+        include: {
+          specialities: true,
+        },
+      },
+    },
+  });
+
+  return result;
 };
 
 export const DoctorService = {
