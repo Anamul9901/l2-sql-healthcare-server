@@ -9,7 +9,7 @@ const getAllFromDb = async (
   params: IDoctorFilterRequest,
   options: IPaginationOptions
 ) => {
-  const { searchTerm, ...filterData } = params;
+  const { searchTerm, specialties, ...filterData } = params;
   //   console.log(filterData); //* aikhane upore destracture korar karone, searchTerm bade onno gulu show korbe
   const { limit, page, skip, sortBy, sortOrder } =
     paginationHelper.calculatePaginatin(options);
@@ -25,6 +25,22 @@ const getAllFromDb = async (
           mode: "insensitive",
         },
       })),
+    });
+  }
+
+  // doctor >> doctorSpecialties >> specialties -> title
+  if (specialties && specialties.length > 0) {
+    andConditions.push({
+      doctorSpecialties: {
+        some: {
+          specialities: {
+            title: {
+              contains: specialties,
+              mode: "insensitive",
+            },
+          },
+        },
+      },
     });
   }
 
@@ -60,6 +76,13 @@ const getAllFromDb = async (
         : {
             createdAt: "desc",
           },
+    include: {
+      doctorSpecialties: {
+        include: {
+          specialities: true,
+        },
+      },
+    },
   });
 
   const total = await prisma.doctor.count({
