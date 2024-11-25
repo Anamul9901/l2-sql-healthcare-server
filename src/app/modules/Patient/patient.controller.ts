@@ -62,10 +62,25 @@ const deleteFromDB: RequestHandler = catchAsync(async (req, res) => {
     });
   });
 
+const softDelete: RequestHandler = catchAsync(async (req, res) => {
+    const {id} = req.params;
+
+
+    const result = await PatientService.softDelete(id);
+  
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Patient deleted successfully!",
+      data: null
+    });
+  });
+
   export const PatientController = {
     getAllFromDB,
     getByIdFromDB,
     updateIntoDB,
-    deleteFromDB
+    deleteFromDB,
+    softDelete
   }
 
