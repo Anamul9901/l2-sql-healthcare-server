@@ -150,7 +150,7 @@ const updateIntoDB = async (
   return responseData;
 };
 
-const deleteFromDB = async (id: string) => {
+const deleteFromDB = async (id: string): Promise<Patient | null> => {
   /**
    foragn key thakle delete korar ruls: 
    1: je foragn key e relation line nai segulue age delete korte hobe.
@@ -194,7 +194,7 @@ const deleteFromDB = async (id: string) => {
   return result;
 };
 
-const softDelete = async (id: string): Promise<Patient> => {
+const softDelete = async (id: string): Promise<Patient | null> => {
   await prisma.patient.findUniqueOrThrow({
     where: {
       id,
