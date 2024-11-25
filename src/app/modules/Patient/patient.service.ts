@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Patient, Prisma } from "@prisma/client";
 import { paginationHelper } from "../../../helpars/paginationHelper";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import prisma from "../../../shared/prisma";
@@ -79,6 +79,40 @@ const getAllFromDb = async (
   };
 };
 
+const getByIdFromDB = async (id: string): Promise<Patient | null> => {
+  const result = await prisma.patient.findUniqueOrThrow({
+    where: {
+      id,
+      isDeleted: false,
+    },
+    include: {
+      medicalReport: true,
+      patientHealthData: true,
+    },
+  });
+
+  return result;
+};
+
+const updateIntoDB = async (id: string, payload: any) => {
+  console.log(id, payload);
+  await prisma.patient.findUniqueOrThrow({
+    where: { id, isDeleted: false },
+  });
+  const result = await prisma.patient.update({
+    where: { id },
+    data: payload,
+    include: {
+      patientHealthData: true,
+      medicalReport: true,
+    },
+  });
+
+  return result;
+};
+
 export const PatientService = {
   getAllFromDb,
+  getByIdFromDB,
+  updateIntoDB,
 };

@@ -22,7 +22,35 @@ const getAllFromDB: RequestHandler = catchAsync(async (req, res) => {
     });
   });
 
+const getByIdFromDB: RequestHandler = catchAsync(async (req, res) => {
+
+    const result = await PatientService.getByIdFromDB(req.params.id);
+  
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Patient data retrieve",
+      data: result
+    });
+  });
+
+const updateIntoDB: RequestHandler = catchAsync(async (req, res) => {
+    const {id} = req.params;
+
+
+    const result = await PatientService.updateIntoDB(id, req.body);
+  
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Patient data retrieve",
+      data: result
+    });
+  });
+
   export const PatientController = {
-    getAllFromDB
+    getAllFromDB,
+    getByIdFromDB,
+    updateIntoDB
   }
 
