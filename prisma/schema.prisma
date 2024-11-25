@@ -82,7 +82,7 @@ model Patient {
 
   user              User               @relation(references: [email], fields: [email])
   patientHealthData PatientHealthData?
-  MedicalReport     MedicalReport[]
+  medicalReport     MedicalReport[]
 
   @@map("patients")
 }
