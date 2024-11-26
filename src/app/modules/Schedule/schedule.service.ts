@@ -1,7 +1,10 @@
 import { addHours, addMinutes, format } from "date-fns";
 import prisma from "../../../shared/prisma";
-import { Schedule } from "@prisma/client";
-import { ISchedule } from "./schedule.interface";
+import { Prisma, Schedule } from "@prisma/client";
+import { IFilterRequest, ISchedule } from "./schedule.interface";
+import { IPaginationOptions } from "../../interfaces/pagination";
+import { paginationHelper } from "../../../helpars/paginationHelper";
+import { IAuthUser } from "../../interfaces/common";
 
 const inserIntoDB = async (payload: ISchedule): Promise<Schedule[]> => {
   const { startDate, endDate, startTime, endTime } = payload;
@@ -63,6 +66,104 @@ const inserIntoDB = async (payload: ISchedule): Promise<Schedule[]> => {
   return schedules;
 };
 
+const getAllFromDB = async (
+  filters: IFilterRequest,
+  options: IPaginationOptions,
+  user: IAuthUser
+) => {
+  const { startDate, endDate, ...filterData } = filters;
+  //   console.log(filterData); //* aikhane upore destracture korar karone, searchTerm bade onno gulu show korbe
+
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePaginatin(options);
+  // console.log({ limit, page, sortBy, sortOrder });
+
+  const andConditions: Prisma.ScheduleWhereInput[] = [];
+
+  if (startDate && endDate) {
+    andConditions.push({
+      AND: [
+        {
+          startDateTime: {
+            gte: startDate,
+          },
+        },
+        {
+          endDateTime: {
+            lte: endDate,
+          },
+        },
+      ],
+    });
+  }
+
+  //   console.log(Object.keys(filterData)); // aikhane key gulu array akare debe
+  if (Object.keys(filterData).length > 0) {
+    andConditions.push({
+      AND: Object.keys(filterData).map((key) => ({
+        [key]: {
+          equals: (filterData as any)[key],
+        },
+      })),
+    });
+  }
+
+  //   console.dir(andConditions, {depth: 'indinity'})
+
+  const whereContitions: Prisma.ScheduleWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+  //   console.log({whereContitions})
+
+  const doctorSchedules = await prisma.doctorSchedules.findMany({
+    where: {
+      doctor: {
+        email: user?.email,
+      },
+    },
+  });
+
+  const doctorScheduleIds = doctorSchedules.map(
+    (schedule) => schedule.scheduleId
+  );
+
+  // console.log(doctorScheduleIds);
+
+  const result = await prisma.schedule.findMany({
+    where: {
+      ...whereContitions,
+      id: {
+        notIn: doctorScheduleIds,
+      },
+    },
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder
+        ? {
+            [sortBy]: sortOrder,
+          }
+        : {},
+  });
+
+  const total = await prisma.schedule.count({
+    where: {
+      ...whereContitions,
+      id: {
+        notIn: doctorScheduleIds,
+      },
+    },
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
 export const ScheduleService = {
   inserIntoDB,
+  getAllFromDB,
 };
