@@ -7,4 +7,10 @@ const router = express.Router();
 
 router.post("/", auth(UserRole.DOCTOR), DoctorScheduleController.insertIntoDB);
 
+router.get(
+  "/my-schedule",
+  auth(UserRole.DOCTOR),
+  DoctorScheduleController.getMySchedule
+);
+
 export const DoctorSchedulRoutes = router;
