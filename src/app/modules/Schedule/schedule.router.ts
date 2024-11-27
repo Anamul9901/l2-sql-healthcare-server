@@ -13,4 +13,6 @@ router.post(
   ScheduleController.inserIntoDB
 );
 
+router.get("/:id", auth(UserRole.DOCTOR), ScheduleController.getByIdFromDB);
+
 export const ScheduleRoutes = router;

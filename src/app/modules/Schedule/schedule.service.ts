@@ -163,7 +163,18 @@ const getAllFromDB = async (
   };
 };
 
+const getByIdFromDB = async(user: IAuthUser, id: string)=>{
+
+  const findOne = await prisma.schedule.findFirst({
+    where: {
+      id,
+    }
+  })
+  return findOne
+}
+
 export const ScheduleService = {
   inserIntoDB,
   getAllFromDB,
+  getByIdFromDB
 };
