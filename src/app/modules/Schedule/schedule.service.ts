@@ -163,18 +163,32 @@ const getAllFromDB = async (
   };
 };
 
-const getByIdFromDB = async(user: IAuthUser, id: string)=>{
-
+const getByIdFromDB = async (user: IAuthUser, id: string) => {
   const findOne = await prisma.schedule.findFirst({
     where: {
       id,
-    }
-  })
-  return findOne
-}
+    },
+  });
+  return findOne;
+};
+
+const deleteSchedul = async (id: string) => {
+  await prisma.schedule.findUniqueOrThrow({
+    where: {
+      id,
+    },
+  });
+
+  const result = await prisma.schedule.delete({
+    where: { id },
+  });
+
+  return result;
+};
 
 export const ScheduleService = {
   inserIntoDB,
   getAllFromDB,
-  getByIdFromDB
+  getByIdFromDB,
+  deleteSchedul,
 };

@@ -15,4 +15,9 @@ router.post(
 
 router.get("/:id", auth(UserRole.DOCTOR), ScheduleController.getByIdFromDB);
 
+router.delete(
+  "/:id",
+  auth(UserRole.SUPER_ADMIN, UserRole.ADMIN),
+  ScheduleController.deleteSchedul
+);
 export const ScheduleRoutes = router;
