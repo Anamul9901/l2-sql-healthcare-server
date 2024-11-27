@@ -55,6 +55,28 @@ const createAppointment = async (user: IAuthUser, payload: any) => {
       },
     });
 
+    const today = new Date();
+    // any unique string
+    const transactionId =
+      "PH-HealthCare-" +
+      today.getFullYear() +
+      "-" +
+      today.getMonth() +
+      "-" +
+      today.getDate() +
+      "-" +
+      today.getHours() +
+      "-" +
+      today.getMinutes();
+      
+    await tx.payment.create({
+      data: {
+        appointmentId: appointmentData.id,
+        amount: doctorData.appointmentFee,
+        transactionId: transactionId,
+      },
+    });
+
     return appointmentData;
   });
 
