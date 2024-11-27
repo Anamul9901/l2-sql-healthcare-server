@@ -3,6 +3,7 @@ import prisma from "../../../shared/prisma";
 import { IAuthUser } from "../../interfaces/common";
 import { IPaginationOptions } from "../../interfaces/pagination";
 import { paginationHelper } from "../../../helpars/paginationHelper";
+import ApiError from "../../errors/ApiError";
 
 const insertIntoDB = async (
   user: any,
@@ -116,7 +117,56 @@ const getMySchedule = async (
   };
 };
 
+const deleteFromDB = async (user: IAuthUser, scheduleId: string) => {
+  const doctorDelete = await prisma.doctor.findUniqueOrThrow({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  const isBookedSchedule = await prisma.doctorSchedules.findUnique({
+    where: {
+      doctorId_scheduleId: {
+        doctorId: doctorDelete.id,
+        scheduleId: scheduleId,
+      },
+      isBooked: true,
+    },
+  });
+
+  if (isBookedSchedule) {
+    throw new ApiError(
+      404,
+      "You can not delete the schedule, because of the schedule already booked!"
+    );
+  }
+
+  const isExistBook = await prisma.doctorSchedules.findUniqueOrThrow({
+    where: {
+      doctorId_scheduleId: {
+        doctorId: doctorDelete.id,
+        scheduleId: scheduleId,
+      },
+    },
+  });
+
+ 
+
+  // composite key theke delete korte gele aivabe delete korte hobe. @@id onujaye
+  const result = await prisma.doctorSchedules.delete({
+    where: {
+      doctorId_scheduleId: {
+        doctorId: doctorDelete.id,
+        scheduleId: scheduleId,
+      },
+    },
+  });
+
+  return result;
+};
+
 export const DoctorSchedulService = {
   insertIntoDB,
   getMySchedule,
+  deleteFromDB,
 };
