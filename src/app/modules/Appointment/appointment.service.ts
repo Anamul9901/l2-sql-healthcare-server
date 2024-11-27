@@ -1,6 +1,9 @@
 import prisma from "../../../shared/prisma";
 import { IAuthUser } from "../../interfaces/common";
 import { v4 as uuidv4 } from "uuid";
+import { IPaginationOptions } from "../../interfaces/pagination";
+import { paginationHelper } from "../../../helpars/paginationHelper";
+import { Prisma, UserRole } from "@prisma/client";
 
 const createAppointment = async (user: IAuthUser, payload: any) => {
   const patientData = await prisma.patient.findUniqueOrThrow({
@@ -68,7 +71,7 @@ const createAppointment = async (user: IAuthUser, payload: any) => {
       today.getHours() +
       "-" +
       today.getMinutes();
-      
+
     await tx.payment.create({
       data: {
         appointmentId: appointmentData.id,
@@ -83,6 +86,83 @@ const createAppointment = async (user: IAuthUser, payload: any) => {
   return result;
 };
 
+const getMyAppointment = async (
+  user: IAuthUser,
+  filter: any,
+  options: IPaginationOptions
+) => {
+  const { limit, page, skip, sortOrder, sortBy } =
+    paginationHelper.calculatePaginatin(options);
+  const { ...filterData } = filter;
+
+  const andCondition: Prisma.AppointmentWhereInput[] = [];
+
+  if (user?.role === UserRole.PATIENT) {
+    andCondition.push({
+      patient: {
+        email: user?.email,
+      },
+    });
+  } else if (user?.role === UserRole.DOCTOR) {
+    andCondition.push({
+      doctor: {
+        email: user?.email,
+      },
+    });
+  }
+
+  if (Object.keys(filterData).length > 0) {
+    const filterConditins = Object.keys(filterData).map((key) => ({
+      [key]: {
+        equals: (filterData as any)[key],
+      },
+    }));
+    andCondition.push(...filterConditins);
+  }
+
+  const whereContitions: Prisma.AppointmentWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
+
+  const result = await prisma.appointment.findMany({
+    where: whereContitions,
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder
+        ? {
+            [sortBy]: sortOrder,
+          }
+        : {
+            createdAt: "desc",
+          },
+    include:
+      user?.role === UserRole.PATIENT
+        ? { doctor: true, schedule: true }
+        : {
+            patient: {
+              include: {
+                medicalReport: true,
+                patientHealthData: true,
+              },
+            },
+            schedule: true,
+          },
+  });
+
+  const total = await prisma.appointment.count({
+    where: whereContitions,
+  });
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
+
 export const AppointmentService = {
   createAppointment,
+  getMyAppointment,
 };
